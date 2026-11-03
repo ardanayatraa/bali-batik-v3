@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BB3_VERSION', '3.2.0' );
+define( 'BB3_VERSION', '3.2.1' );
 define( 'BB3_DIR', get_template_directory() );
 define( 'BB3_URI', get_template_directory_uri() );
 
