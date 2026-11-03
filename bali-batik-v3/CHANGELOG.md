@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.2.1 — 2026-11-03
+
+- Publish theme updates automatically after checks pass on pushes or merged PRs to main. Unmerged PRs run checks without publishing.
+- Automatically increment the patch version when unchanged, synchronize both version declarations, create the tag, and attach the installable ZIP and SHA-256 checksum.
+- Clarify that automatic installation and its setup checkbox are enabled by default on new installs; preserve an owner's explicit opt-out.
+
 ## 3.2.0 — 2026-11-03
 
 - One business name everywhere: the WordPress Site Title (Customize → Bali Batik → Brand & Contact) now drives the logo text, page titles, meta descriptions, Open Graph/Twitter, JSON-LD, footer, WhatsApp messages and patterns. Old theme-stored names are moved to the Site Title once.

@@ -6,12 +6,18 @@ $options = array();
 $cache = array();
 $filters = array();
 $requests = 0;
+preg_match( '/^Version:\s*([0-9.]+)\s*$/m', file_get_contents( __DIR__ . '/../bali-batik-v3/style.css' ), $version_match );
+$installed_version = $version_match[1];
+$future_parts = array_map( 'intval', explode( '.', $installed_version ) );
+++ $future_parts[2];
+$future_version = implode( '.', $future_parts );
+$future_url = 'https://github.com/ardanayatraa/bali-batik-v3/releases';
 $payload = array(
-	'tag_name' => 'v3.2.1',
-	'html_url' => 'https://github.com/ardanayatraa/bali-batik-v3/releases/tag/v3.2.1',
+	'tag_name' => 'v' . $future_version,
+	'html_url' => $future_url . '/tag/v' . $future_version,
 	'assets' => array( array(
-		'name' => 'bali-batik-v3-3.2.1.zip',
-		'browser_download_url' => 'https://github.com/ardanayatraa/bali-batik-v3/releases/download/v3.2.1/bali-batik-v3-3.2.1.zip',
+		'name' => 'bali-batik-v3-' . $future_version . '.zip',
+		'browser_download_url' => $future_url . '/download/v' . $future_version . '/bali-batik-v3-' . $future_version . '.zip',
 		'digest' => 'sha256:' . str_repeat( 'a', 64 ),
 	) ),
 );
@@ -26,7 +32,7 @@ function wp_http_validate_url( $url ) { return filter_var( $url, FILTER_VALIDATE
 function wp_get_theme( $slug ) {
 	return new class {
 		function exists() { return true; }
-		function get( $key ) { return '3.2.0'; }
+		function get( $key ) { global $installed_version; return $installed_version; }
 	};
 }
 function wp_safe_remote_get( $url, $args ) {
@@ -52,12 +58,12 @@ check( array( '', '' ) === bb3_update_source(), 'insecure manifest rejected' );
 unset( $options['bb3_update_source'] );
 
 $release = bb3_remote_release( true );
-check( '3.2.1' === $release['version'], 'release tag parsed' );
+check( $future_version === $release['version'], 'release tag parsed' );
 check( str_repeat( 'a', 64 ) === $release['sha256'], 'GitHub asset checksum parsed' );
 bb3_remote_release();
 check( 1 === $requests, 'cached release avoids repeat network calls' );
 $result = $filters['pre_set_site_transient_update_themes']( (object) array() );
-check( '3.2.1' === $result->response[BB3_SLUG]['new_version'], 'WordPress is offered a newer version' );
+check( $future_version === $result->response[BB3_SLUG]['new_version'], 'WordPress is offered a newer version' );
 check( true === $filters['auto_update_theme']( false, (object) array( 'theme' => BB3_SLUG ) ), 'theme update runs automatically' );
 $options['bb3_auto_update'] = 0;
 check( false === $filters['auto_update_theme']( true, (object) array( 'theme' => BB3_SLUG ) ), 'owner can disable automatic installation' );
@@ -75,7 +81,7 @@ check( null === bb3_remote_release( true ), 'release without installable asset r
 if ( isset( $argv[1] ) ) {
 	$payload = json_decode( file_get_contents( $argv[1] ), true, 512, JSON_THROW_ON_ERROR );
 	$release = bb3_remote_release( true );
-	check( null !== $release && '3.2.0' === $release['version'], 'published v3.2.0 is readable' );
+	check( null !== $release && $installed_version === $release['version'], 'published current version is readable' );
 	check( '' !== $release['sha256'], 'published release provides a checksum' );
 	$result = $filters['pre_set_site_transient_update_themes']( (object) array() );
 	check( ! isset( $result->response[BB3_SLUG] ), 'installed current version is not offered again' );

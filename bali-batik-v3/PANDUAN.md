@@ -30,14 +30,14 @@
 1. Bawaan: tema otomatis mengecek rilis resmi di GitHub `ardanayatraa/bali-batik-v3` — tidak perlu disetel. Untuk mengganti sumber: **Appearance → Bali Batik Setup → Automatic updates** → isi *Update source*:
    - repositori GitHub `owner/repo` (Release berisi `bali-batik-v3-x.y.z.zip`), atau
    - alamat HTTPS file manifest `bali-batik-v3.json`.
-2. Centang *Install new theme versions automatically* → **Save and check now**.
+2. *Install new theme versions automatically* sudah tercentang secara bawaan pada instalasi baru. Jika sebelumnya dinonaktifkan, centang kembali → **Save and check now**.
 3. WordPress mengecek 2× sehari; versi baru muncul di **Dashboard → Updates** dan terpasang otomatis. File diverifikasi dengan SHA-256 bila tersedia. Produk & pengaturan tetap aman.
 4. Untuk situs klien bisa dikunci di `wp-config.php`: `define( 'BB3_UPDATE_SOURCE', 'owner/repo' );` dan `define( 'BB3_AUTO_UPDATE', true );`.
 5. Jika situs memakai ZIP lama tanpa sumber update, unggah ZIP 3.2.0 dari GitHub Releases sekali. Jika sumber sebelumnya tersimpan kosong atau memakai alamat lama, isi `ardanayatraa/bali-batik-v3` lalu **Save and check now**.
 
 ## Merilis versi baru (developer)
-1. Ubah kode, naikkan versi di `style.css` (*Version*) **dan** `functions.php` (*BB3_VERSION*), catat di `CHANGELOG.md`.
-2. GitHub: commit & push, lalu buat tag `v3.2.1` → workflow `.github/workflows/release.yml` otomatis membuat ZIP + Release (dengan sha256).
+1. Ubah kode di branch sendiri, lalu buka PR ke `main` agar pemeriksaan dijalankan. PR diterbitkan setelah di-merge; push langsung ke `main` juga didukung.
+2. GitHub: perubahan tema di `main` yang lolos pemeriksaan otomatis menjadi ZIP + Release (dengan sha256). Patch dinaikkan otomatis jika belum diubah. Untuk minor/major, naikkan versi di `style.css` (*Version*) **dan** `functions.php` (*BB3_VERSION*) sendiri. Tag dibuat otomatis; tarik perubahan `main` sebelum mengembangkan lagi agar mendapat commit versi terbaru.
 3. Tanpa GitHub: `python tools/release.py --base-url https://domain-anda/updates/` → unggah ZIP + `bali-batik-v3.json` ke folder itu.
 
 ## Backup & pembaruan manual

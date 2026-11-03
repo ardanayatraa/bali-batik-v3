@@ -43,6 +43,7 @@ function bb3_update_source(): array {
 	return array( '', '' );
 }
 
+/** Enabled by default, including the setup checkbox, unless the owner opts out. */
 function bb3_auto_update_enabled(): bool {
 	if ( defined( 'BB3_AUTO_UPDATE' ) ) {
 		return (bool) BB3_AUTO_UPDATE;

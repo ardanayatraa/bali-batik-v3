@@ -1,41 +1,86 @@
-# Push a tag like v3.2.1 → this builds bali-batik-v3-3.2.1.zip and publishes a
-# GitHub Release. Sites whose update source is "owner/repository" see the new
-# version and, with automatic updates on, install it themselves.
+# PRs are checked; pushes and merged PRs on main publish an update.
 name: Release theme
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+    paths:
+      - 'bali-batik-v3/**'
+      - 'tools/**'
+      - '.github/workflows/release.yml'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: theme-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  release:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check tag matches theme version
-        run: |
-          VERSION=$(grep -m1 '^Version:' bali-batik-v3/style.css | awk '{print $2}')
-          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match style.css Version $VERSION"; exit 1
-          fi
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-
-      - name: Build package
+      - name: Check theme and release tooling
         run: |
           find bali-batik-v3 tools -name '*.php' -print0 | xargs -0 -n1 php -l
           php tools/test-updater.php
+          python3 -m unittest discover -s tools -p 'test_*.py'
           python3 tools/release.py
+
+  release:
+    needs: validate
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LATEST=$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq .tag_name)
+          python3 tools/prepare-release.py --latest "$LATEST" --github-output "$GITHUB_OUTPUT"
+
+      - name: Save release version on main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bali-batik-v3/style.css bali-batik-v3/functions.php bali-batik-v3/CHANGELOG.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Release v${{ steps.version.outputs.version }} [skip ci]"
+            git push origin HEAD:main
+          fi
+
+      - name: Build package
+        run: python3 tools/release.py
 
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
+          TAG="v$VERSION"
+          if git show-ref --verify --quiet "refs/tags/$TAG"; then
+            if [ "$(git rev-list -n1 "$TAG")" != "$(git rev-parse HEAD)" ]; then
+              echo "Tag $TAG already points to another commit"; exit 1
+            fi
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
           SHA=$(cut -d' ' -f1 "dist/bali-batik-v3-$VERSION.zip.sha256")
-          gh release create "$GITHUB_REF_NAME" "dist/bali-batik-v3-$VERSION.zip" "dist/bali-batik-v3-$VERSION.zip.sha256" \
+          gh release create "$TAG" "dist/bali-batik-v3-$VERSION.zip" "dist/bali-batik-v3-$VERSION.zip.sha256" \
             --verify-tag \
             --title "Bali Batik V3 $VERSION" \
-            --notes "sha256: $SHA"
+            --notes "Theme update from main. Commit: $(git rev-parse HEAD)
+
+          sha256: $SHA"
