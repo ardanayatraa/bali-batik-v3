@@ -1,0 +1,10 @@
+/* Bali Batik V3 — admin screens. */
+.bb3-admin-fields .bb3-admin-field{margin:0 0 16px}
+.bb3-admin-tip{background:#f6f7f7;border-left:4px solid #2f8548;padding:10px 12px;margin:0 0 18px}
+.bb3-admin-demo{background:#fcf9e8;border-left:4px solid #dba617;padding:10px 12px;margin:0 0 14px}
+.bb3-demo-flag{display:inline-block;margin-top:4px;padding:1px 6px;border-radius:3px;background:#dba617;color:#fff;font-size:10px;font-weight:600;text-transform:uppercase}
+.bb3-gallery-list{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0}
+.bb3-gallery-list li{position:relative;margin:0;cursor:move}
+.bb3-gallery-list img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:3px}
+.bb3-gallery-remove{position:absolute;top:2px;right:2px;width:22px;height:22px;border:0;border-radius:50%;background:#000a;color:#fff;cursor:pointer;line-height:1}
+.bb3-image-preview img{max-width:150px;height:auto;margin:8px 0;border-radius:3px}

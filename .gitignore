@@ -1,0 +1,17 @@
+# Publish only the theme and its release tooling.
+/*
+!/.gitignore
+!/README.md
+!/.github/
+!/bali-batik-v3/
+!/tools/
+
+# Local artifacts and credentials must stay outside Git.
+**/.env
+**/.env.*
+**/*.log
+**/*.zip
+**/__pycache__/
+**/node_modules/
+**/_private/
+**/.DS_Store
